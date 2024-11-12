@@ -25,6 +25,23 @@ services:
     networks:
       - my_network
 
+  terraform:
+    build:
+      context: ./terraform
+      dockerfile: Dockerfile
+    depends_on:
+      - keycloak
+    environment:
+      KEYCLOAK_URL: http://keycloak:8080
+      KEYCLOAK_USER: admin
+      KEYCLOAK_PASSWORD: admin
+    networks:
+      - my_network
+    entrypoint: /bin/sh
+    command: "-c './wait-for-keycloak.sh && terraform -chdir=objects init && terraform -chdir=objects apply -auto-approve'"
+    volumes:
+      - ./terraform:/app
+
   app:
     build:
       context: .
